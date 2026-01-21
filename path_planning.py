@@ -35,3 +35,5 @@ class Car:
         self.x += self.v * np.cos(self.theta) * dt
         self.y += self.v * np.sin(self.theta) * dt
 
+    def pos(self):
+        return np.array(self.x, self.y)

@@ -2,7 +2,10 @@ import numpy as np
 import pygame
 import matplotlib
 import matplotlib.pyplot as plt
+
 import path_planning
+import map
+import lidar
 
 WIDTH, HEIGHT = 800, 800
 pygame.init()
@@ -11,20 +14,29 @@ clock = pygame.time.Clock()
 
 car = path_planning.Car()
 
-car.x = 200
-car.y = 300
+car.x = 2
+car.y = 3
+car.L = 2
 car.theta = 0
 car.v = 1.0
 dt = 0.05
 acc = 0.0
 #delta = np.deg2rad(20)
-delta = 0
+delta = 0.0
 
 # map (walls)
-walls = [((100,100),(700,100)), ((700,100),(700,500)), ((700,500),(100,500)), ((100,500),(100,100))]
+walls = [((1,1),(7,1)), ((7,1),(7,5)), ((7,5),(1,5)), ((1,5),(1,1))]
 
+world_map = map.create_map(walls)
+lidar = lidar.Lidar()
+lidar.x = car.x
+lidar.y = car.y
 
 running = True
+
+def to_screen(p):
+    return int(p[0] * 100), int(HEIGHT - p[1] * 100)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -44,22 +56,30 @@ while running:
     elif keys[pygame.K_d]:
         delta -= 0.02
 
-    print(f"delta: {delta}")
+    #print(f"delta: {delta}")
 
     # update car model
     car.update(acc, delta, dt)
+    lidar.x = car.x
+    lidar.y = car.y
     # draw
     screen.fill((0,0,0))
     # map
     for wall in walls:
-        pygame.draw.line(screen, (255,255,255), wall[0], wall[1], 2)
+        pygame.draw.line(screen, (255,255,255), to_screen(wall[0]), to_screen(wall[1]), 2)
     # car
-    pygame.draw.circle(screen, (0,0,255), (int(car.x), int(car.y)), 5)
+    pygame.draw.circle(screen, (0,0,255), to_screen((car.x, car.y)), 10)
     # LIDAR (simple)
+    start = to_screen((car.x, car.y))
     for angle in np.linspace(0, 2 * np.pi, 90):
-        dx = np.cos(car.theta + angle) * 100
-        dy = np.sin(car.theta + angle) * 100
-        pygame.draw.line(screen, (255,0,0), (int(car.x), int(car.y)), (int(car.x+dx), int(car.y+dy)), 1)
+        dx = np.cos(car.theta + angle) * lidar.scan_len
+        dy = np.sin(car.theta + angle) * lidar.scan_len
+        end = to_screen((car.x + dx, car.y + dy))
+        pygame.draw.line(screen, (255, 0, 0), start, end, 1)
+
+    hit_points = lidar.scan(car, world_map)
+    for point in hit_points:
+        pygame.draw.circle(screen, (0, 0, 255), to_screen(point), 10)
 
     pygame.display.flip()
     clock.tick(20)  # FPS
