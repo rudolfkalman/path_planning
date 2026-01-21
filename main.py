@@ -15,7 +15,7 @@ clock = pygame.time.Clock()
 car = path_planning.Car()
 
 car.x = 2
-car.y = 3
+car.y = 2
 car.L = 2
 car.theta = 0
 car.v = 1.0
@@ -25,7 +25,7 @@ acc = 0.0
 delta = 0.0
 
 # map (walls)
-walls = [((1,1),(7,1)), ((7,1),(7,5)), ((7,5),(1,5)), ((1,5),(1,1)), ((2,3), (2,4)), ((2,4), (4,4)), ((4, 4), (2,3))]
+walls = [((1,1),(7,1)), ((7,1),(7,5)), ((7,5),(1,5)), ((1,5),(1,1)), ((2,3), (2,4)), ((2,4), (4,4)), ((4, 4), (4,3)), ((4,3), (2,3))]
 
 world_map = map.create_map(walls)
 lidar = lidar.Lidar()
