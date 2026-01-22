@@ -52,9 +52,9 @@ while running:
         acc = 0.0
 
     if keys[pygame.K_a]:
-        delta += 0.02
+        delta += 0.2
     elif keys[pygame.K_d]:
-        delta -= 0.02
+        delta -= 0.2
 
     #print(f"delta: {delta}")
 
@@ -71,7 +71,7 @@ while running:
     pygame.draw.circle(screen, (0,0,255), to_screen((car.x, car.y)), 10)
     # LIDAR (simple)
     start = to_screen((car.x, car.y))
-    for angle in np.linspace(0, 2 * np.pi, 90):
+    for angle in np.linspace(0, 2 * np.pi, 360):
         dx = np.cos(car.theta + angle) * lidar.scan_len
         dy = np.sin(car.theta + angle) * lidar.scan_len
         end = to_screen((car.x + dx, car.y + dy))
@@ -82,4 +82,4 @@ while running:
         pygame.draw.circle(screen, (0, 0, 255), to_screen(point), 10)
 
     pygame.display.flip()
-    clock.tick(20)  # FPS
+    clock.tick(240)  # FPS
