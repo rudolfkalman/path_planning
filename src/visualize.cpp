@@ -47,9 +47,30 @@ void Visualizer::draw_car(Robot::Car &car, double delta) {
   Eigen::Vector2d car_pos = car.get_pos();
   double theta = car.get_theta();
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+  SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
   Visualizer::draw_filled_circle(renderer, car_pos.x() * 100,
                                  window_h - car_pos.y() * 100, 10);
+  Eigen::Matrix2d Rot;
+  Rot << std::cos(theta), -std::sin(theta),
+         std::sin(theta),  std::cos(theta);
+  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  Eigen::Vector2d x_axis(1, 0);
+  x_axis = Rot * x_axis;
+  SDL_RenderLine(renderer, car_pos.x() * 100, window_h - car_pos.y() * 100,
+                (car_pos.x() + x_axis.x()) * 100, window_h - (car_pos.y() + x_axis.y()) * 100); 
+  SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+  Eigen::Vector2d y_axis(0, 1);
+  y_axis = Rot * y_axis;
+  SDL_RenderLine(renderer, car_pos.x() * 100, window_h - car_pos.y() * 100,
+                 (car_pos.x() + y_axis.x()) * 100, window_h - (car_pos.y() + y_axis.y()) * 100);
+  SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
+  Eigen::Vector2d steer_dir(1, 0);
+  Eigen::Matrix2d Rot_steer;
+  Rot_steer << std::cos(theta + delta), -std::sin(theta + delta),
+               std::sin(theta + delta),  std::cos(theta + delta);
+  steer_dir = Rot_steer * steer_dir;
+  SDL_RenderLine(renderer, car_pos.x() * 100, window_h - car_pos.y() * 100,
+                (car_pos.x() + steer_dir.x()) * 100, window_h - (car_pos.y() + steer_dir.y()) * 100); 
 }
 
 void Visualizer::draw_map(std::vector<Map::Wall> &world_map) {
@@ -63,15 +84,19 @@ void Visualizer::draw_map(std::vector<Map::Wall> &world_map) {
 }
 
 void Visualizer::draw_lidar_scan(Robot::Car &car, Sensor::Lidar &lidar,
-                                 std::vector<Map::Wall> &world_map) {
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-  Eigen::Vector2d car_pos = car.get_pos();
-  for (double angle = lidar.get_rad_min(); angle < lidar.get_rad_max(); angle+=lidar.get_step()) {
-    double dx = std::cos(car.get_theta() + angle) * lidar.get_scan_len();
-    double dy = std::sin(car.get_theta() + angle) * lidar.get_scan_len();
-    SDL_RenderLine(renderer, car_pos.x() * 100, window_h - car_pos.y() * 100,
-                   (car_pos.x() + dx) * 100,
-                   window_h - (car_pos.y() + dy) * 100);
+                                 std::vector<Map::Wall> &world_map,
+                                 bool show_lidar_ray) {
+  if (show_lidar_ray) {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    Eigen::Vector2d car_pos = car.get_pos();
+    for (double angle = lidar.get_rad_min(); angle < lidar.get_rad_max();
+         angle += lidar.get_step()) {
+      double dx = std::cos(car.get_theta() + angle) * lidar.get_scan_len();
+      double dy = std::sin(car.get_theta() + angle) * lidar.get_scan_len();
+      SDL_RenderLine(renderer, car_pos.x() * 100, window_h - car_pos.y() * 100,
+                     (car_pos.x() + dx) * 100,
+                     window_h - (car_pos.y() + dy) * 100);
+    }
   }
 
   std::vector<Eigen::Vector2d> points = lidar.scan(car, world_map);

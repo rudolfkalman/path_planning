@@ -24,7 +24,9 @@ add_executable(${PROJECT_NAME}
   src/sensor.cpp
   src/map.cpp
   src/visualize.cpp
-  src/path_planning.cpp)
+  src/path_planning.cpp
+  src/log.cpp
+)
 
 #add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE 

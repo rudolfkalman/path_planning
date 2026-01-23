@@ -6,6 +6,7 @@
 #include "robot.hpp"
 #include "sensor.hpp"
 #include "visualize.hpp"
+#include "log.hpp"
 #include <SDL3/SDL.h>
 
 #define WINDOW_W 1280
@@ -15,7 +16,7 @@ Visualize::Visualizer visualizer(WINDOW_W, WINDOW_H);
 constexpr int TARGET_FPS = 240;
 constexpr Uint32 FRAME_MS = 1000 / TARGET_FPS;
 
-constexpr double FIXED_DT = 0.005;
+constexpr double FIXED_DT = 0.05;
 
 int main() {
   visualizer.Init();
@@ -24,9 +25,9 @@ int main() {
   car.set_pos(2, 2);
   car.set_L(2);
   car.set_theta(0);
-  car.set_velocity(0.1);
+  car.set_velocity(1);
   double acc = 0.0;
-  double delta = 0.1;
+  double delta = 0;
 
   std::vector<Map::Wall> world_map{
       Map::Wall({1, 1}, {7, 1}), Map::Wall({7, 1}, {7, 5}),
@@ -41,10 +42,13 @@ int main() {
   bool running = true;
   Uint32 prev_time = SDL_GetTicks();
   double accumulator = 0.0;
+
+  double sim_time = 0.0;
   while (running) {
     Uint32 current_time = SDL_GetTicks();
     double frame_time = (current_time - prev_time) / 1000.0;
     accumulator += frame_time;
+    prev_time = current_time;
 
     while (SDL_PollEvent(&visualizer.event)) {
       if (visualizer.event.type == SDL_EVENT_QUIT) {
@@ -63,20 +67,22 @@ int main() {
     const bool *keys = SDL_GetKeyboardState(nullptr);
 
     if (keys[SDL_SCANCODE_W])
-      acc = 0.01;
+      acc = 1;
     else if (keys[SDL_SCANCODE_S])
-      acc = -0.01;
+      acc = -1;
     else
       acc = 0.0;
 
     if (keys[SDL_SCANCODE_A])
-      delta += 0.2;
+      delta += M_PI / 6;
     if (keys[SDL_SCANCODE_D])
-      delta -= 0.2;
+      delta -= M_PI / 6;
 
     // Fix dt
     while (accumulator >= FIXED_DT) {
       car.update(acc, delta, FIXED_DT);
+      Log::log_console_car(sim_time, car);
+      sim_time += FIXED_DT;
       accumulator -= FIXED_DT;
     }
 
@@ -87,7 +93,7 @@ int main() {
     SDL_RenderClear(visualizer.renderer);
     visualizer.draw_car(car, delta);
     visualizer.draw_map(world_map);
-    visualizer.draw_lidar_scan(car, lidar, world_map);
+    visualizer.draw_lidar_scan(car, lidar, world_map, false);
 
     SDL_RenderPresent(visualizer.renderer);
     Uint32 frame_ms = SDL_GetTicks() - current_time;

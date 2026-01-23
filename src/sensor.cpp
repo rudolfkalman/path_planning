@@ -91,4 +91,16 @@ void Lidar::set_rad_max(double rad_max){
   this->rad_max = rad_max;
 }
 
+double Imu::get_acc(Robot::Car &car, double dt){
+  return 0;
+}
+
+double Imu::get_angular_velocity(Robot::Car &car, double dt){
+  return 0;
+}
+
+double Imu::get_orientation(Robot::Car &car, double dt){
+  return 0;
+}
+
 } // namespace Sensor

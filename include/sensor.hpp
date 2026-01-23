@@ -4,8 +4,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "robot.hpp"
 #include "map.hpp"
+#include "robot.hpp"
 #include <Eigen/Dense>
 #include <vector>
 
@@ -16,7 +16,8 @@ class Lidar {
 public:
   Lidar() = default;
 
-  std::vector<Eigen::Vector2d> scan(const Robot::Car &robot, const std::vector<Map::Wall> &walls);
+  std::vector<Eigen::Vector2d> scan(const Robot::Car &robot,
+                                    const std::vector<Map::Wall> &walls);
 
   Eigen::Vector2d get_pos();
   double get_scan_len();
@@ -39,6 +40,15 @@ private:
   double step = M_PI / 360;
   double rad_min = 0.0;
   double rad_max = 2 * M_PI;
+};
+class Imu {
+public:
+  double get_acc(Robot::Car &car, double dt);
+  double get_angular_velocity(Robot::Car &car, double dt);
+  double get_orientation(Robot::Car &car, double dt);
+
+private:
+  double theta = 0;
 };
 } // namespace Sensor
 #endif

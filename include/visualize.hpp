@@ -20,7 +20,7 @@ public:
   int Init();
   void draw_car(Robot::Car &car, double delta);
   void draw_map(std::vector<Map::Wall> &world_map);
-  void draw_lidar_scan(Robot::Car &car, Sensor::Lidar &lidar, std::vector<Map::Wall> &world_map);
+  void draw_lidar_scan(Robot::Car &car, Sensor::Lidar &lidar, std::vector<Map::Wall> &world_map, bool show_lidar_ray);
   void draw_filled_circle(SDL_Renderer* renderer, int cx, int cy, int radius);
 
   int window_w = 1280;
