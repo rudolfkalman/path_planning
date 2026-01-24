@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
   src/visualize.cpp
   src/path_planning.cpp
   src/log.cpp
+  src/noise.cpp
 )
 
 #add_executable(${PROJECT_NAME} src/main.cpp)

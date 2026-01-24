@@ -21,6 +21,7 @@ public:
   void set_L(double L);
   double get_theta() const;
   double get_velocity() const;
+  double get_omega() const;
   Eigen::Vector2d get_pos() const;
   void set_control(double acc, double delta);
   ControlInput get_control() const;

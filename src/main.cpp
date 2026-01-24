@@ -39,6 +39,9 @@ int main() {
   Eigen::Vector2d car_pos = car.get_pos();
   lidar.set_pos(car_pos.x(), car_pos.y());
 
+  Sensor::Imu imu;
+  Sensor::Odom odom(car.get_pos().x(), car.get_pos().y(), car.get_theta());
+
   bool running = true;
   Uint32 prev_time = SDL_GetTicks();
   double accumulator = 0.0;
@@ -78,10 +81,19 @@ int main() {
     if (keys[SDL_SCANCODE_D])
       delta -= M_PI / 6;
 
-    // Fix dt
     while (accumulator >= FIXED_DT) {
+      // update
       car.update(acc, delta, FIXED_DT);
-      Log::log_console_car(sim_time, car);
+      odom.update(car, FIXED_DT);
+
+      // log
+      std::vector<std::string> logs;
+      logs.push_back(Log::log_car(sim_time, car));
+      logs.push_back(Log::log_imu(car, imu, FIXED_DT));
+      logs.push_back(Log::log_odom(odom));
+      Log::flush_console(logs);
+
+      // fix dt
       sim_time += FIXED_DT;
       accumulator -= FIXED_DT;
     }

@@ -6,6 +6,8 @@
 
 #include "map.hpp"
 #include "robot.hpp"
+#include "noise.hpp"
+
 #include <Eigen/Dense>
 #include <vector>
 
@@ -43,12 +45,31 @@ private:
 };
 class Imu {
 public:
-  double get_acc(Robot::Car &car, double dt);
+  Imu() = default;
+  Eigen::Vector2d get_acc(Robot::Car &car, double dt);
   double get_angular_velocity(Robot::Car &car, double dt);
   double get_orientation(Robot::Car &car, double dt);
 
 private:
-  double theta = 0;
+  Noise::Noise_Generator noise_acc{0.0, 0.08};
+  Noise::Noise_Generator noise_angular_velocity{0.0, 0.01};
+  Noise::Noise_Generator noise_orientation{0.0, 0.01};
 };
+
+class Odom{
+public:
+  Odom(double x, double y, double theta);
+
+  void update(Robot::Car &car, double dt);
+  Eigen::Vector2d get_estimated_pos() const;
+  double get_estimated_theta() const;
+private:
+  double estimate_x = 0.0;
+  double estimate_y = 0.0;
+  double estimate_theta = 0.0;
+  Noise::Noise_Generator noise_dist{0.0, 1.0};
+  Noise::Noise_Generator noise_angle{0.0, 0.01};
+};
+
 } // namespace Sensor
 #endif

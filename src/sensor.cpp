@@ -91,16 +91,51 @@ void Lidar::set_rad_max(double rad_max){
   this->rad_max = rad_max;
 }
 
-double Imu::get_acc(Robot::Car &car, double dt){
-  return 0;
+Eigen::Vector2d Imu::get_acc(Robot::Car &car, double dt){
+  Robot::ControlInput u = car.get_control();
+  double measurement_acc_x = u.acc + noise_acc.generate_gaussian_noise();
+  double measurement_acc_y = car.get_velocity() * car.get_omega() + noise_acc.generate_gaussian_noise();
+  return Eigen::Vector2d(measurement_acc_x, measurement_acc_y);
 }
 
 double Imu::get_angular_velocity(Robot::Car &car, double dt){
-  return 0;
+  double measurement_angular_velocity = car.get_omega() + noise_angular_velocity.generate_gaussian_noise();
+  return measurement_angular_velocity;
 }
 
 double Imu::get_orientation(Robot::Car &car, double dt){
-  return 0;
+  double measurement_theta = car.get_theta() + noise_orientation.generate_gaussian_noise();
+  return measurement_theta;
+}
+
+Odom::Odom(double x, double y, double theta)
+  // initial state x, y, theta is estimate_x, estimate_y, estimate_theta
+  : estimate_x(x),
+    estimate_y(y),
+    estimate_theta(theta)
+{}
+
+void Odom::update(Robot::Car &car, double dt){
+  if(car.get_velocity() < 0.001 && car.get_velocity() > -0.001){
+    return;
+  }
+  double displacement = car.get_velocity() * dt;
+  double delta_theta = car.get_omega() * dt;
+
+  displacement = displacement + noise_dist.generate_gaussian_noise();
+  delta_theta = delta_theta + noise_angle.generate_gaussian_noise();
+
+  estimate_theta += delta_theta;
+  estimate_x += displacement * std::cos(estimate_theta);
+  estimate_y += displacement * std::sin(estimate_theta);
+}
+
+Eigen::Vector2d Odom::get_estimated_pos() const {
+  return Eigen::Vector2d(estimate_x, estimate_y);
+}
+
+double Odom::get_estimated_theta() const {
+  return estimate_theta;
 }
 
 } // namespace Sensor
