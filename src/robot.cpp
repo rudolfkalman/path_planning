@@ -48,6 +48,7 @@ double Car::get_omega() const {
   return omega;
 }
 
+
 Eigen::Vector2d Car::get_pos() const {
   return Eigen::Vector2d(x, y);
 }

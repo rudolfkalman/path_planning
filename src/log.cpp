@@ -26,7 +26,8 @@ std::string log_car(double t, const Robot::Car &car) {
      << "[t=" << t << "] "
      << " x=" << car.get_pos().x() << "m"
      << " y=" << car.get_pos().y() << "m"
-     << " v=" << rad2deg(car.get_velocity()) << "deg/s"
+     << " v=" << car.get_velocity() << "m/s"
+     << " omega=" << rad2deg(car.get_omega()) << "deg/s"
      << " theta=" << std::fmod(rad2deg(car.get_theta()), 360.0) << "deg"
      << " acc=" << u.acc << "m/s^2"
      << " delta=" << rad2deg(u.delta) << "deg";
@@ -39,8 +40,10 @@ std::string log_imu(Robot::Car &car, Sensor::Imu &imu, double dt) {
   double orientation = imu.get_orientation(car, dt);
   std::ostringstream ss;
   ss << std::fixed << std::setprecision(2) << "[IMU] "
-     << " acc_x=" << acc.x() << " acc_y=" << acc.y()
-     << " angular_velocity=" << angular_velocity << " orientation" << std::fmod(rad2deg(orientation), 360.0) << "deg";
+     << " acc_x=" << acc.x() << "m/s^2"
+     << " acc_y=" << acc.y() << "m/s^2"
+     << " omega=" << rad2deg(angular_velocity) << "deg/s"
+     << " orientation" << std::fmod(rad2deg(orientation), 360.0) << "deg";
   return ss.str();
 }
 
@@ -48,9 +51,20 @@ std::string log_odom(Sensor::Odom &odom){
   Eigen::Vector2d odom_pos = odom.get_estimated_pos();
   std::ostringstream ss;
   ss << std::fixed << std::setprecision(2) << "[ODOM] "
-     << " odom_x=" << odom_pos.x()
-     << " odom_y=" << odom_pos.y()
+     << " odom_x=" << odom_pos.x() << "m"
+     << " odom_y=" << odom_pos.y() << "m"
      << " odom_theta=" << std::fmod(rad2deg(odom.get_estimated_theta()), 360.0) << "deg";
+  return ss.str();
+}
+
+std::string log_ekf(Filter::Ekf &ekf) {
+  Eigen::Vector2d pos = ekf.get_pos();
+  std::ostringstream ss;
+  ss << std::fixed << std::setprecision(2) << "[EKF]  "
+     << " x=" << pos.x() << "m"
+     << " y=" << pos.y() << "m"
+     << " theta=" << std::fmod(rad2deg(ekf.get_theta()), 360.0) << "deg"
+     << " v=" << ekf.x(3) << "m/s"; // 状態ベクトルの4番目が速度
   return ss.str();
 }
 

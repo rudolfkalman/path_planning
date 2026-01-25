@@ -107,4 +107,40 @@ void Visualizer::draw_lidar_scan(Robot::Car &car, Sensor::Lidar &lidar,
   }
 }
 
+void Visualizer::draw_measurement(Eigen::Vector2d &pos, double theta) {
+  SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+  Visualizer::draw_filled_circle(renderer, pos.x() * 100,
+                                 window_h - pos.y() * 100, 10);
+  Eigen::Matrix2d Rot;
+  Rot << std::cos(theta), -std::sin(theta),
+         std::sin(theta),  std::cos(theta);
+  SDL_SetRenderDrawColor(renderer, 255, 0, 128, 255);
+  Eigen::Vector2d x_axis(1, 0);
+  x_axis = Rot * x_axis;
+  SDL_RenderLine(renderer, pos.x() * 100, window_h - pos.y() * 100,
+                (pos.x() + x_axis.x()) * 100, window_h - (pos.y() + x_axis.y()) * 100); 
+  SDL_SetRenderDrawColor(renderer, 0, 255, 128, 255);
+  Eigen::Vector2d y_axis(0, 1);
+  y_axis = Rot * y_axis;
+  SDL_RenderLine(renderer, pos.x() * 100, window_h - pos.y() * 100,
+                 (pos.x() + y_axis.x()) * 100, window_h - (pos.y() + y_axis.y()) * 100);
+
+}
+
+void Visualizer::draw_ekf(Eigen::Vector2d &pos, double theta) {
+  // 黄色い円で描画
+  SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+  Visualizer::draw_filled_circle(renderer, pos.x() * 100, window_h - pos.y() * 100, 8);
+  
+  Eigen::Matrix2d Rot;
+  Rot << std::cos(theta), -std::sin(theta),
+         std::sin(theta),  std::cos(theta);
+         
+  // 方向線（黄色）
+  SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+  Eigen::Vector2d x_axis = Rot * Eigen::Vector2d(1, 0);
+  SDL_RenderLine(renderer, pos.x() * 100, window_h - pos.y() * 100,
+                (pos.x() + x_axis.x()) * 100, window_h - (pos.y() + x_axis.y()) * 100); 
+}
+
 } // namespace Visualize

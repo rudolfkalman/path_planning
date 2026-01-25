@@ -67,8 +67,8 @@ private:
   double estimate_x = 0.0;
   double estimate_y = 0.0;
   double estimate_theta = 0.0;
-  Noise::Noise_Generator noise_dist{0.0, 1.0};
-  Noise::Noise_Generator noise_angle{0.0, 0.01};
+  Noise::Noise_Generator noise_dist{0.0, 0.005};
+  Noise::Noise_Generator noise_angle{0.0, 0.001};
 };
 
 } // namespace Sensor

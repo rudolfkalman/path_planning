@@ -7,6 +7,7 @@
 #include "sensor.hpp"
 #include "visualize.hpp"
 #include "log.hpp"
+#include "filter.hpp"
 #include <SDL3/SDL.h>
 
 #define WINDOW_W 1280
@@ -41,6 +42,8 @@ int main() {
 
   Sensor::Imu imu;
   Sensor::Odom odom(car.get_pos().x(), car.get_pos().y(), car.get_theta());
+
+  Filter::Ekf ekf(car.get_pos().x(), car.get_pos().y(), car.get_theta(), car.get_velocity());
 
   bool running = true;
   Uint32 prev_time = SDL_GetTicks();
@@ -86,11 +89,16 @@ int main() {
       car.update(acc, delta, FIXED_DT);
       odom.update(car, FIXED_DT);
 
+      ekf.predict(car.get_control(), FIXED_DT, 2.0);
+      ekf.update_orientation(imu.get_orientation(car, FIXED_DT));
+      ekf.update_velocity(car.get_velocity());
+
       // log
       std::vector<std::string> logs;
       logs.push_back(Log::log_car(sim_time, car));
       logs.push_back(Log::log_imu(car, imu, FIXED_DT));
       logs.push_back(Log::log_odom(odom));
+      logs.push_back(Log::log_ekf(ekf));
       Log::flush_console(logs);
 
       // fix dt
@@ -103,9 +111,15 @@ int main() {
 
     SDL_SetRenderDrawColor(visualizer.renderer, 0, 0, 0, 255);
     SDL_RenderClear(visualizer.renderer);
+
     visualizer.draw_car(car, delta);
     visualizer.draw_map(world_map);
     visualizer.draw_lidar_scan(car, lidar, world_map, false);
+    Eigen::Vector2d odom_pos = odom.get_estimated_pos();
+    visualizer.draw_measurement(odom_pos, odom.get_estimated_theta());
+
+    Eigen::Vector2d ekf_pos = ekf.get_pos();
+    visualizer.draw_ekf(ekf_pos, ekf.get_theta());
 
     SDL_RenderPresent(visualizer.renderer);
     Uint32 frame_ms = SDL_GetTicks() - current_time;

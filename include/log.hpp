@@ -3,6 +3,7 @@
 
 #include "robot.hpp"
 #include "sensor.hpp"
+#include "filter.hpp"
 
 namespace Log{
 double rad2deg(double rad);
@@ -12,6 +13,7 @@ void flush_console(const std::vector<std::string> &logs);
 std::string log_car(double t, const Robot::Car& car);
 std::string log_imu(Robot::Car& car, Sensor::Imu &imu, double dt);
 std::string log_odom(Sensor::Odom &odom);
+std::string log_ekf(Filter::Ekf &ekf);
 }
 
 #endif
