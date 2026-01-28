@@ -28,7 +28,7 @@ add_executable(${PROJECT_NAME}
   src/log.cpp
   src/noise.cpp
   src/filter.cpp
-  #src/slam.cpp
+  src/slam.cpp
 )
 
 #add_executable(${PROJECT_NAME} src/main.cpp)

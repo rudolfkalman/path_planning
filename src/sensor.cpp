@@ -39,7 +39,8 @@ std::vector<Eigen::Vector2d> Lidar::scan(const Robot::Car &robot, const std::vec
     }
 
     if (min_point_initialized) {
-      points.push_back(min_point);
+      Eigen::Vector2d scan_noise(noise.generate_gaussian_noise(), noise.generate_gaussian_noise());
+      points.push_back(min_point + scan_noise);
     }
   }
   return points;

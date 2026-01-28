@@ -42,6 +42,7 @@ private:
   double step = M_PI / 360;
   double rad_min = 0.0;
   double rad_max = 2 * M_PI;
+  Noise::Noise_Generator noise{0.0, 0.005};
 };
 class Imu {
 public:
